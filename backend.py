@@ -74,7 +74,9 @@ def publisher_register_act():
 @app.route('/publisher/home')
 @requires_auth
 def publisher_home():
-	return request.authorization.username
+	u = User.query.filter_by(username=request.authorization.username).first()
+
+	return render_template('home.html', user=u)
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', debug=True)
