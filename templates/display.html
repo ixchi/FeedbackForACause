@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css">
+	<style>
+	h1 {
+		font-size: 2em;
+	}
+
+	h2 {
+		font-size: 1.5em;
+	}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Feedback for a cause</h1>
+
+				<div class="message"></div>
+
+				<form method="POST" action="http://localhost:8080/donation" class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-10 col-sm-offset-2 resp-type">
+							<div class="radio anon-input">
+								<label>
+									<input type="radio" name="responseType" value="anon">
+									Anonymous response
+								</label>
+							</div>
+
+							<div class="radio">
+								<label>
+									<input type="radio" name="responseType" value="name" checked>
+									Donate with name
+								</label>
+							</div>
+
+							<div class="radio">
+								<label>
+									<input type="radio" name="responseType" value="friend">
+									Challenge a friend
+								</label>
+							</div>
+						</div>
+					</div>
+
+					<div style="margin-top: 15px"></div>
+
+					{% for question in cause.questions %}
+					<div class="form-group">
+						<p class="col-sm-10 col-sm-offset-2">
+							{{ question.text }}
+						</p>
+
+						<div class="col-sm-10 col-sm-offset-2">
+							<div class="radio">
+								<label>
+									<input type="radio" name="question-{{ question.id }}" value="question1">
+									{{ question.question_1 }}
+								</label>
+							</div>
+
+							<div class="radio">
+								<label>
+									<input type="radio" name="question-{{ question.id }}" value="question1">
+									{{ question.question_2 }}
+								</label>
+							</div>
+
+							{% if question.question_3 is not none %}
+							<div class="radio">
+								<label>
+									<input type="radio" name="question-{{ question.id }}" value="question1">
+									{{ question.question_3 }}
+								</label>
+							</div>
+							{% endif %}
+
+							{% if question.question_4 is not none %}
+							<div class="radio">
+								<label>
+									<input type="radio" name="question-{{ question.id }}" value="question1">
+									{{ question.question_4 }}
+								</label>
+							</div>
+							{% endif %}
+						</div>
+					</div>
+					{% endfor %}
+
+					<div class="form-group name">
+						<label class="control-label col-sm-2" for="name">Name</label>
+						<div class="col-sm-10">
+							<input type="text" placeholder="Name" name="name" class="form-control">
+						</div>
+					</div>
+
+					<div class="form-group name">
+						<label class="control-label col-sm-2" for="email">Email</label>
+						<div class="col-sm-10">
+							<input type="email" placeholder="Email address" name="email" class="form-control">
+						</div>
+					</div>
+
+					<div class="form-group friend">
+						<label class="control-label col-sm-2" for="friend_name">Friend's name</label>
+						<div class="col-sm-10">
+							<input type="text" placeholder="Friend's name" name="friend_name" class="form-control">
+						</div>
+					</div>
+
+					<div class="form-group friend">
+						<label class="control-label col-sm-2" for="friend_email">Friend's email</label>
+						<div class="col-sm-10">
+							<input type="email" placeholder="Friend's email address" name="friend_email" class="form-control">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-sm-10 col-sm-offset-2">
+							<button type="submit" class="btn btn-primary">Submit feedback</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	{% raw %}
+	<script id="feedback-goal" type="x-tmpl-mustache">
+		<h2>
+			If we get <strong>{{ responses }}</strong> feedback responses, we'll donate <strong>${{ money }}</strong> to <strong>{{ charity }}</strong>!
+		</h2>
+
+		<div class="items">
+			<div class="pull-left">0%</div>
+			<div class="pull-right">100%</div>
+			<div class="clearfix"></div>
+		</div>
+		<div class="progress">
+			<div class="progress-bar" style="width: {{ completed }}%">{{ completed }}%</div>
+		</div>
+
+		<div class="text-center">Just {{ remaining }}, {{ percent }}% to go</div>
+	</script>
+
+	<script id="feedback-single" type="x-tmpl-mustache">
+		<h2>
+			For every response, we'll donate <strong>${{ amount }}</strong> to <strong>{{ charity }}</strong>! We've donated <strong>${{ total }}</strong> so far.
+		</h2>
+	</script>
+	{% endraw %}
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.1.0/mustache.min.js"></script>
+	<script>
+	var radios = document.querySelectorAll('.resp-type input[type="radio"]');
+
+	for (var i = 0; i < radios.length; i++) {
+		radios[i].addEventListener('click', function (ev) {
+			updateVisible(ev.target.value);
+		});
+	}
+
+	var fields = {
+		anon: document.querySelectorAll('.anon'),
+		name: document.querySelectorAll('.name'),
+		friend: document.querySelectorAll('.friend')
+	};
+
+	var renderTemplate = function (type, data) {
+		var rendered = Mustache.render(document.getElementById('feedback-' + type).innerHTML, data);
+		document.querySelector('.message').innerHTML = rendered;
+	};
+
+	var updateVisible = function (type) {
+		for (var key in fields) {
+			for (var i = 0; i < fields[key].length; i++) {
+				fields[key][i].style.display = 'none';
+			}
+		}
+
+		for (var i = 0; i < fields[type].length; i++) {
+			fields[type][i].style.display = 'block';
+		}
+	};
+
+	var enableAnon = function (on) {
+		if (!on) {
+			document.querySelector('.anon-input').style.display = 'none';
+		}
+	};
+
+	var goalType = '{{ cause.feedback_goal_type }}';
+
+	updateVisible('name');
+	enableAnon(!{{ cause.email_required|tojson }});
+	</script>
+
+	{% if cause.feedback_goal_type == 'goal' %}
+	<script>
+	renderTemplate('goal', {
+		completed: {{ count }},
+		responses: {{ cause.goal_feedback_required }},
+		money: {{ cause.goal_donation_amount }},
+		charity: {{ cause.goal_donation_charity|tojson }},
+		remaining: {{ cause.goal_feedback_required }} - {{ count }},
+		percent: Math.abs({{ count }} / {{ cause.goal_feedback_required }} - 100).toFixed(2)
+	});
+	</script>
+	{% elif cause.feedback_goal_type == 'single' %}
+	<script>
+	renderTemplate('single', {
+		amount: '',
+		charity: '',
+		total: ''
+	});
+	</script>
+	{% endif %}
+</body>
+</html>

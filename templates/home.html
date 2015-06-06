@@ -3,7 +3,18 @@
 {% block body %}
 	<div class="row">
 		<div class="col-sm-12">
-			<h1>Welcome, {{ user.username }}</h1>
+			<h1>Welcome, {{ publisher.first_name }}</h1>
+
+			{% for cause in causes %}
+				{{ cause }}
+				{% for question in cause.questions %}
+				{{ question.text }}
+				{{ question.question_1 }}
+				{{ question.question_2 }}
+				{{ question.question_3 }}
+				{{ question.question_4 }}
+				{% endfor %}
+			{% endfor %}
 		</div>
 	</div>
 {% endblock %}
