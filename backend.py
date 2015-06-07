@@ -3,16 +3,24 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_debugtoolbar import DebugToolbarExtension
 from functools import wraps
 from json import dumps, loads
+from werkzeug.utils import secure_filename
 import bcrypt
 import urllib
 import requests
 
+UPLOAD_FOLDER = './uploads'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@127.0.0.1/globalhack'
 app.config['SECRET_KEY'] = 'a test key'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.debug = True
 db = SQLAlchemy(app)
 toolbar = DebugToolbarExtension(app)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 class Publisher(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -273,6 +281,12 @@ def publisher_create_act():
 	answer3 = request.form['answer_3']
 	answer4 = request.form['answer_4']
 	required_fields = request.form.getlist('required_fields')
+	header_message = request.form['header_message']
+	url = request.form['url']
+
+	file = request.files['file_upload']
+	if file and allowed_file(file.filename):
+		filename = secure_filename(file.filename)
 
 	print(required_fields)
 
@@ -298,6 +312,9 @@ def publisher_create_act():
 	cause.goal_feedback_required = rate_count
 	cause.goal_donation_amount = rate_total
 	cause.goal_donation_charity = name_of_organization
+
+	cause.header_message = header_message
+	cause.url = url
 
 	db.session.add(cause)
 	db.session.commit()

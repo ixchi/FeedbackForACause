@@ -16,9 +16,23 @@
 		<div class="col-sm-12">
 			<form method="POST" action="/publisher/create" class="form-horizontal">
 				<div class="form-group">
-					<label class="control-label col-sm-2" for="supported_organization">Name of Organization: </label>
+					<label class="control-label col-sm-2" for="supported_organization">Name of Organization</label>
 					<div class="col-sm-10">
 						<input type="text" class="form-control" placeholder="Enter the name of the organization you want to support" name="supported_organization">
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="control-label col-sm-2" for="header_message">Header message</label>
+					<div class="col-sm-10">
+						<input type="text" class="form-control" placeholder="Message displayed above questions" name="header_message">
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="control-label col-sm-2" for="url">Organization URL</label>
+					<div class="col-sm-10">
+						<input type="url" class="form-control" placeholder="Enter the URL of the organization you want to support" name="url">
 					</div>
 				</div>
 
@@ -44,19 +58,20 @@
 					</div>
 				</div>
 
-				<!--<div class="form-group">
+				<div class="form-group">
 					<label class="control-label col-sm-2" for="type_of_question">Type of question</label>
 					<div class="col-sm-10">
 						<select class="form-control" name="type_of_question">
 							<option value="yes_no">Yes/No</option>
-							<option value="multiple">Multiple</option>
-							<option value="matrix">Matrix</option>
-							<option value="slider">Slider</option>
-							<option value="comment">Comment</option>
-							<option value="media">Media</option>
+							<option value="true_false">True/False</option>
+							<option value="multiple" selected="selected">Multiple choice</option>
+							<option value="matrix" disabled="disabled">Matrix</option>
+							<option value="slider" disabled="disabled">Slider</option>
+							<option value="comment" disabled="disabled">Comment</option>
+							<option value="media" disabled="disabled">Media</option>
 						</select>
 					</div>
-				</div>-->
+				</div>
 
 				<div class="form-group">
 					<label class="control-label col-sm-2">Answer #1</label>
@@ -111,4 +126,45 @@
 			</form>
 		</div>
 	</div>
+
+	<script>
+	var answers = document.querySelectorAll('input[name^="answer_"]');
+
+	document.querySelector('select[name="type_of_question"]').addEventListener('change', function (e) {
+		var val = e.target.value;
+
+		switch (val) {
+			case 'yes_no':
+				for (var i = 0; i < answers.length; i++) {
+					answers[i].value = '';
+				}
+
+				answers[0].value = 'Yes';
+				answers[1].value = 'No';
+
+				break;
+			case 'multiple':
+				for (var i = 0; i < answers.length; i++) {
+					answers[i].value = '';
+				}
+
+				break;
+			case 'true_false':
+				for (var i = 0; i < answers.length; i++) {
+					answers[i].value = '';
+				}
+
+				answers[0].value = 'True';
+				answers[1].value = 'False';
+
+				break;
+			default:
+				for (var i = 0; i < answers.length; i++) {
+					answers[i].value = '';
+				}
+
+				break;
+		}
+	});
+	</script>
 {% endblock %}

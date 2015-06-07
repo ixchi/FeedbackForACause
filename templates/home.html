@@ -5,15 +5,24 @@
 		<div class="col-sm-12">
 			<h1>Welcome, {{ publisher.first_name }}</h1>
 
+			<h2><a href="/publisher/create">Create a new item</a></h2>
+
 			{% for cause in causes %}
-				{{ cause }}
-				{% for question in cause.questions %}
-				{{ question.text }}
-				{{ question.question_1 }}
-				{{ question.question_2 }}
-				{{ question.question_3 }}
-				{{ question.question_4 }}
-				{% endfor %}
+				<h3>{{ cause.goal_donation_charity }}</h3>
+
+				<ul>
+					{% for question in cause.questions %}
+						<li>
+							<strong>{{ question.text }}</strong>
+							<ul>
+								<li>{{ question.question_1 }}</li>
+								<li>{{ question.question_2 }}</li>
+								{% if question.question_3 != '' and question.question_3 is not none %}<li>{{ question.question_3 }}</li>{% endif %}
+								{% if question.question_3 != '' and question.question_4 is not none %}<li>{{ question.question_4 }}</li>{% endif %}
+							</ul>
+						</li>
+					{% endfor %}
+				</ul>
 			{% endfor %}
 		</div>
 	</div>

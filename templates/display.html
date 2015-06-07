@@ -15,6 +15,7 @@
 		font-size: 1.5em;
 	}
 
+	.temp-hidden,
 	.social-page {
 		display: none;
 	}
@@ -44,7 +45,7 @@
 
 							<div class="radio">
 								<label>
-									<input type="radio" name="responseType" value="name" checked>
+									<input type="radio" name="responseType" value="name">
 									Donate with name
 								</label>
 							</div>
@@ -210,12 +211,23 @@
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.1.0/mustache.min.js"></script>
 	<script src="https://cdn.rawgit.com/timheap/serialize.js/master/serialize.min.js"></script>
+	<script src="http://globalhack4.test.lockerdome.com/gh_app_platform.js"></script>
 	<script>
 	var radios = document.querySelectorAll('.resp-type input[type="radio"]'),
 		hasUnhidden = false;
 
 	for (var i = 0; i < radios.length; i++) {
 		radios[i].addEventListener('click', function (ev) {
+			if (!hasUnhidden) {
+				var tempHidden = document.querySelectorAll('.temp-hidden');
+
+				for (var i = 0; i < tempHidden.length; i++) {
+					tempHidden[i].classList.remove('temp-hidden');
+				}
+
+				hasUnhidden = true;
+			}
+
 			updateVisible(ev.target.value);
 		});
 	}
@@ -231,6 +243,8 @@
 		document.querySelector('.message').innerHTML = rendered;
 	};
 
+	LD.request_height(300);
+
 	var currentVisible;
 	var updateVisible = function (type) {
 		for (var key in fields) {
@@ -240,6 +254,15 @@
 			}
 		}
 
+		switch (type) {
+			case 'anon':
+				LD.request_height(500);
+				break;
+			case 'name':
+				LD.request_height(650);
+				break;
+		}
+
 		for (var i = 0; i < fields[type].length; i++) {
 			fields[type][i].style.display = 'block';
 			fields[type][i].querySelector('input').required = 'required';
@@ -247,7 +270,6 @@
 
 		currentVisible = type;
 	};
-	updateVisible('name');
 
 	var enableAnon = function (on) {
 		if (!on) {
