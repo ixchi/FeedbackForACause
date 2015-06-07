@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Response, render_template, redirect, url_for
+from flask import Flask, jsonify, request, Response, render_template, redirect, url_for, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_debugtoolbar import DebugToolbarExtension
 from functools import wraps
@@ -6,6 +6,7 @@ from json import dumps, loads
 from werkzeug.utils import secure_filename
 import bcrypt
 import urllib
+import os
 import requests
 
 UPLOAD_FOLDER = './uploads'
@@ -287,8 +288,8 @@ def publisher_create_act():
 	file = request.files['file_upload']
 	if file and allowed_file(file.filename):
 		filename = secure_filename(file.filename)
-
-	print(required_fields)
+		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+		image = url_for('uploaded_file',filename=filename)
 
 	data = dumps({
 		'app_id': '7742364034531394',
@@ -315,6 +316,7 @@ def publisher_create_act():
 
 	cause.header_message = header_message
 	cause.url = url
+	cause.image = image
 
 	db.session.add(cause)
 	db.session.commit()
@@ -325,6 +327,10 @@ def publisher_create_act():
 	db.session.commit()
 
 	return redirect('http://globalhack4.test.lockerdome.com/7739974724091969/%s' % (cause.lockerdome_id))
+
+@app.route('/photo/<filename>')
+def uploaded_file(filename):
+	return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')

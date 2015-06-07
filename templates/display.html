@@ -22,6 +22,18 @@
 	</style>
 </head>
 <body>
+	<div class="container preview-page">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Support <span class="charity-name"></span></h1>
+
+				<img class="charity-image img-responsive" src="{{ cause.image|e }}">
+
+				<a href="#" class="btn btn-primary btn-lg support-button" style="margin-top: 10px">Support</a>
+			</div>
+		</div>
+	</div>
+
 	<div class="container main-page">
 		<div class="row">
 			<div class="col-sm-12">
@@ -216,6 +228,21 @@
 	var radios = document.querySelectorAll('.resp-type input[type="radio"]'),
 		hasUnhidden = false;
 
+	LD.request_height(375);
+
+	document.querySelector('.main-page').style.display = 'none';
+
+	document.querySelector('.support-button').addEventListener('click', function (e) {
+		e.preventDefault();
+
+		document.querySelector('.charity-name').innerHTML = {{ cause.goal_donation_charity|tojson }};
+
+		document.querySelector('.preview-page').style.display = 'none';
+		document.querySelector('.main-page').style.display = 'block';
+
+		LD.request_height(300);
+	});
+
 	for (var i = 0; i < radios.length; i++) {
 		radios[i].addEventListener('click', function (ev) {
 			if (!hasUnhidden) {
@@ -242,8 +269,6 @@
 		var rendered = Mustache.render(document.getElementById('feedback-' + type).innerHTML, data);
 		document.querySelector('.message').innerHTML = rendered;
 	};
-
-	LD.request_height(300);
 
 	var currentVisible;
 	var updateVisible = function (type) {
