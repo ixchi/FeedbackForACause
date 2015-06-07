@@ -67,6 +67,8 @@ class Cause(db.Model):
 
 	header_message = db.Column(db.String(255))
 
+	title = db.Column(db.String(150))
+
 	publisher_id = db.Column(db.Integer, db.ForeignKey('publisher.id'))
 
 	questions = db.relationship('Question', lazy='dynamic')
@@ -284,6 +286,7 @@ def publisher_create_act():
 	required_fields = request.form.getlist('required_fields')
 	header_message = request.form['header_message']
 	url = request.form['url']
+	title = request.form['title']
 
 	file = request.files['file_upload']
 	if file and allowed_file(file.filename):
@@ -317,6 +320,8 @@ def publisher_create_act():
 	cause.header_message = header_message
 	cause.url = url
 	cause.image = image
+
+	cause.title = title
 
 	db.session.add(cause)
 	db.session.commit()

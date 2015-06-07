@@ -22,14 +22,16 @@
 	</style>
 </head>
 <body>
-	<div class="container preview-page">
+	<div class="container preview-page text-center">
 		<div class="row">
 			<div class="col-sm-12">
-				<h1>Support <span class="charity-name"></span></h1>
+				<h1 class="charity-header"></h1>
 
-				<img class="charity-image img-responsive" src="{{ cause.image|e }}">
+				<h2 class="header-message"></h2>
 
-				<a href="#" class="btn btn-primary btn-lg support-button" style="margin-top: 10px">Support</a>
+				<img class="charity-image img-responsive center-block" src="{{ cause.image|e }}">
+
+				<a href="#" class="btn btn-primary btn-lg support-button input-control" style="margin-top: 10px">Feedback for support</a>
 			</div>
 		</div>
 	</div>
@@ -38,8 +40,6 @@
 		<div class="row">
 			<div class="col-sm-12">
 				<h1>Feedback for a cause</h1>
-
-				<h2 class="header-message text-muted"></h2>
 
 				<div class="message"></div>
 
@@ -189,9 +189,15 @@
 					</div>
 				</div>
 
+				<div style="margin-top: 10px"></div>
+
 				<a target="_blank" class="btn btn-tweet" href="https://twitter.com/intent/tweet?text=I%20just%20helped%20whatever&url=https://www.google.com">Twitter</a>
 				<a target="_blank" class="btn btn-facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ cause.url|urlencode }}">Facebook</a>
 				<a target="_blank" class="btn btn-google" href="https://plus.google.com/share?url={{ cause.url|urlencode }}">Google+</a>
+
+				<div style="margin-top: 10px"></div>
+
+				<img src="{{ url_for('static', filename='awesome.gif') }}" class="img-responsive center-block" style="margin-top: 10px; max-height: 400px">
 			</div>
 		</div>
 	</div>
@@ -228,19 +234,19 @@
 	var radios = document.querySelectorAll('.resp-type input[type="radio"]'),
 		hasUnhidden = false;
 
-	LD.request_height(375);
+	LD.request_height(425);
 
 	document.querySelector('.main-page').style.display = 'none';
+	document.querySelector('.header-message').innerHTML = {{ cause.header_message|tojson }};
+	document.querySelector('.charity-header').innerHTML = {{ cause.title|tojson }};
 
 	document.querySelector('.support-button').addEventListener('click', function (e) {
 		e.preventDefault();
 
-		document.querySelector('.charity-name').innerHTML = {{ cause.goal_donation_charity|tojson }};
-
 		document.querySelector('.preview-page').style.display = 'none';
 		document.querySelector('.main-page').style.display = 'block';
 
-		LD.request_height(300);
+		LD.request_height(325);
 	});
 
 	for (var i = 0; i < radios.length; i++) {
@@ -353,8 +359,6 @@
 	var goalType = '{{ cause.feedback_goal_type }}';
 
 	enableAnon(!{{ cause.email_required|tojson }});
-
-	document.querySelector('.header-message').innerHTML = {{ cause.header_message|tojson }};
 	</script>
 
 	{% if cause.feedback_goal_type == 'goal' %}
