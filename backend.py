@@ -286,7 +286,7 @@ def publisher_create_act():
 	required_fields = request.form.getlist('required_fields')
 	header_message = request.form['header_message']
 	url = request.form['url']
-	title = request.form['title']
+	title = request.form['widget_title']
 
 	file = request.files['file_upload']
 	if file and allowed_file(file.filename):
