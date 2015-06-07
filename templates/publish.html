@@ -1,3 +1,10 @@
+{% extends "layout.html" %}
+
+{% block head %}
+	{{ super() }}
+	<link rel="stylesheet" href="{{ url_for('static', filename='default.css') }}">
+{% endblock %}
+
 {% block body %}
 	<div class="row">
 		<div class="col-sm-12">
@@ -7,40 +14,40 @@
 
 	<div class="row">
 		<div class="col-sm-12">
-			<form method="POST" action="/publisher/createQ" class="form-horizontal">
+			<form method="POST" action="/publisher/create" class="form-horizontal">
 				<div class="form-group">
 					<label class="control-label col-sm-2" for="supported_organization">Name of Organization: </label>
 					<div class="col-sm-10">
-						<input type="text" class="form-control" placeholder="Enter the name of the organization you want to support" name="organization">
+						<input type="text" class="form-control" placeholder="Enter the name of the organization you want to support" name="supported_organization">
+					</div>
+				</div>
+
+				<!--<div class="form-group">
+					<label class="control-label col-sm-2" for="goal_amount">Goal</label>
+					<div class="col-sm-10">
+						<input type="text" class="form-control" placeholder="Desired donation goal" name="goal_amount">
+					</div>
+				</div>-->
+
+				<div class="form-inline">
+					<label class="control-label col-sm-2">Rate</label>
+					<div class="col-sm-10">
+						Per <input type="number" class="form-control" id="numbers" min="0" placeholder="Number of reviews" name="rate_count"> responses
+						$ <input type="number" class="form-control" id="numbers" min="0" placeholder="Amount to be donated" name="rate_total"> will be donated
 					</div>
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-sm-2" for="goal_amount">Goal: </label>
+					<label class="control-label col-sm-2" for="question">Question</label>
 					<div class="col-sm-10">
-						<input type="text" class="form-control" placeholder="Desired donation goal" name="donation_goal">
+						<textarea rows="4" cols="50" placeholder="Enter your question here.." name="question" class="form-control"></textarea>
 					</div>
 				</div>
 
-				<div class="form-inline">
-					<label class="control-label col-sm-2" for="per_review">Rate: &nbsp &nbsp </label>
+				<!--<div class="form-group">
+					<label class="control-label col-sm-2" for="type_of_question">Type of question</label>
 					<div class="col-sm-10">
-						Per <input type="number" class="form-control" id="numbers" min="0" placeholder="Number of reviews" name="recview"> responses
-						$ <input type="number" class="form-control" id="numbers" placeholder="Amount to be donated" name="tobe_donated"> will be donated
-					</div>
-				</div>
-
-				<div class="form-group">
-					<label class="control-label col-sm-2" for="goal_amount">Question: </label>
-					<div class="col-sm-10">
-						<textarea rows="4" cols="50" placeholder="Enter your question here.." name="comment"></textarea>
-					</div>
-				</div>
-
-				<div class="form-inline">
-					<label class="control-label col-sm-2" for="type_of_question">Type of question: </label>
-					<div class="col-sm-10">
-						<select class="form-control" name="questions">
+						<select class="form-control" name="type_of_question">
 							<option value="yes_no">Yes/No</option>
 							<option value="multiple">Multiple</option>
 							<option value="matrix">Matrix</option>
@@ -49,26 +56,53 @@
 							<option value="media">Media</option>
 						</select>
 					</div>
-				</div>
+				</div>-->
 
 				<div class="form-group">
-					<label class="control-label col-sm-2" for="goal_amount">Required fields*: </label>
+					<label class="control-label col-sm-2">Answer #1</label>
 					<div class="col-sm-10">
-						Email <input type="checkbox" name="donation_goal">
-						Feedback <input type="checkbox" checked="True" name="donation_goal">
+						<input type="text" class="form-control" placeholder="Answer #1" name="answer_1">
 					</div>
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-sm-2" for="goal_amount">Upload image: </label>
+					<label class="control-label col-sm-2">Answer #2</label>
 					<div class="col-sm-10">
-						<span class="btn btn-default btn-file">Marketing image <input type="file"></span>
+						<input type="text" class="form-control" placeholder="Answer #2" name="answer_2">
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="control-label col-sm-2">Answer #3</label>
+					<div class="col-sm-10">
+						<input type="text" class="form-control" placeholder="Answer #3" name="answer_3">
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="control-label col-sm-2">Answer #4</label>
+					<div class="col-sm-10">
+						<input type="text" class="form-control" placeholder="Answer #4" name="answer_4">
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="control-label col-sm-2">Required fields</label>
+					<div class="col-sm-10">
+						<label class="checkbox-inline"><input type="checkbox" name="required_fields" value="email">Email</label>
+						<label class="checkbox-inline"><input type="checkbox" checked="checked" name="required_fields" value="feedback">Feedback</label>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="control-label col-sm-2" for="file_upload">Upload image</label>
+					<div class="col-sm-10">
+						<span class="btn btn-default btn-file">Marketing image<input type="file" name="file_upload"></span>
 					</div>
 				</div>
 
 				<div class="form-inline">
 					<div class="col-sm-10 col-sm-offset-2">
-						<button type="submit" class="btn btn-primary">Preview</button>
 						<button type="submit" class="btn btn-primary">Create</button>
 					</div>
 					<div class="preview-widget">

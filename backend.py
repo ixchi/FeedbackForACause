@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, Response, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_debugtoolbar import DebugToolbarExtension
 from functools import wraps
 from json import dumps, loads
 import bcrypt
@@ -8,7 +9,10 @@ import requests
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@127.0.0.1/globalhack'
+app.config['SECRET_KEY'] = 'a test key'
+app.debug = True
 db = SQLAlchemy(app)
+toolbar = DebugToolbarExtension(app)
 
 class Publisher(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -48,6 +52,11 @@ class Cause(db.Model):
 	goal_feedback_required = db.Column(db.Integer)
 	goal_donation_amount = db.Column(db.Integer)
 	goal_donation_charity = db.Column(db.String(255))
+	single_donation_amount = db.Column(db.Numeric)
+
+	url = db.Column(db.String(250))
+
+	header_message = db.Column(db.String(255))
 
 	publisher_id = db.Column(db.Integer, db.ForeignKey('publisher.id'))
 
@@ -92,20 +101,27 @@ class UserResponse(db.Model):
 	question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
 	text = db.Column(db.Text(250))
 
+	def __init__(self, user_id, question_id, text):
+		self.user_id = user_id
+		self.question_id = question_id
+		self.text = text
+
 	def __repr__(self):
 		return '<UserResponse %r>' % (self.question_id)
 
 class User(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	cause_id = db.Column(db.Integer, db.ForeignKey('cause.id'))
-	first_name = db.Column(db.Text(50))
-	last_name = db.Column(db.Text(50))
+	name = db.Column(db.Text(50))
 	email = db.Column(db.Text(150))
+
+	def __init__(self, name, email, cause_id):
+		self.name = name
+		self.email = email
+		self.cause_id = cause_id
 
 	def __repr__(self):
 		return '<User %r>' % (self.email)
-
-app.secret_key = 'atestsecretkey'
 
 def authenticate():
     return Response(
@@ -164,7 +180,13 @@ def publisher_home():
 
 	return render_template('home.html', publisher=u, causes=i)
 
+@app.route('/publisher/create', methods=['GET'])
+@requires_auth
+def publisher_create():
+	return render_template('publish.html')
+
 @app.route('/publisher/add', methods=['POST'])
+@requires_auth
 def publisher_add_act():
 	data = dumps({
 		'app_id': '7742364034531394',
@@ -190,8 +212,6 @@ def publisher_add_act():
 
 	return str(cause.id)
 
-
-
 @app.route('/display')
 def display():
 	data = loads(urllib.unquote(request.query_string))
@@ -203,5 +223,91 @@ def display():
 	return render_template('display.html', cause=cause, count=c)
 
 
+@app.route('/donation', methods=['POST'])
+def donate_act():
+	u = None
+
+	if request.form['responseType'] == 'anon':
+		u = User(None, None, request.form['cause_id'])
+		db.session.add(u)
+		db.session.commit()
+
+	elif request.form['responseType'] == 'name':
+		u = User(request.form['name'], request.form['email'], request.form['cause_id'])
+		db.session.add(u)
+		db.session.commit()
+
+	answers = {}
+	for k, v in request.form.items():
+		if 'question' in k:
+			answers[int(k.replace('question', ''))] = v
+
+	for question, answer in answers.items():
+		resp = UserResponse(u.id, question, answer)
+		db.session.add(resp)
+	db.session.commit()
+
+	return str(u.id)
+
+@app.route('/email', methods=['POST'])
+def email_act():
+	u = User.query.filter_by(id=request.form['user_id']).first()
+
+	u.email = request.form['anon_email']
+
+	db.session.commit()
+
+	return str(u.id)
+
+@app.route('/publisher/create', methods=['POST'])
+@requires_auth
+def publisher_create_act():
+	u = Publisher.query.filter_by(email=request.authorization.username).first()
+
+	name_of_organization = request.form['supported_organization']
+	rate_count = request.form['rate_count']
+	rate_total = request.form['rate_total']
+	question = request.form['question']
+	answer1 = request.form['answer_1']
+	answer2 = request.form['answer_2']
+	answer3 = request.form['answer_3']
+	answer4 = request.form['answer_4']
+	required_fields = request.form.getlist('required_fields')
+
+	print(required_fields)
+
+	data = dumps({
+		'app_id': '7742364034531394',
+		'app_secret': 'mG2QZ1f2o3oSsxpMznORrYAcG5pbhx7JTjC32eZom1domHhSolBPtBjmQ45y4Sxp4nHvaNUFvlEOw2l3F5SxqQ==',
+		'app_data': {
+			'cause_id': 1
+		},
+		'name': 'Donation to %s' % (name_of_organization),
+		'thumb_url': 'http://vignette1.wikia.nocookie.net/scratchpad/images/d/da/LARGEST_AWESOME_FACE_EVER!!!.png/revision/latest?cb=20121226043136',
+		'text': 'Feedback donation drive to %s' % (name_of_organization)
+	})
+
+	query = urllib.quote(data)
+
+	r = requests.get('http://api.globalhack4.test.lockerdome.com/app_create_content?' + query)
+
+	j = r.json()
+
+	cause = Cause(j['result']['id'], 'goal', 'email' in required_fields, 'feedback' in required_fields, False, u.id)
+
+	cause.goal_feedback_required = rate_count
+	cause.goal_donation_amount = rate_total
+	cause.goal_donation_charity = name_of_organization
+
+	db.session.add(cause)
+	db.session.commit()
+
+	q = Question(cause.id, question, answer1, answer2, answer3, answer4)
+
+	db.session.add(q)
+	db.session.commit()
+
+	return redirect('http://globalhack4.test.lockerdome.com/7739974724091969/%s' % (cause.lockerdome_id))
+
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', debug=True)
+	app.run(host='0.0.0.0')

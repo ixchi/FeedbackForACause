@@ -4,6 +4,8 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css">
+	<link rel="stylesheet" href="/static/bower_components/social-sharing/dist/css/social-sharing.min.css">
+	<link rel="stylesheet" href="/static/bower_components/social-sharing/dist/css/kraken-buttons.min.css">
 	<style>
 	h1 {
 		font-size: 2em;
@@ -12,17 +14,25 @@
 	h2 {
 		font-size: 1.5em;
 	}
+
+	.social-page {
+		display: none;
+	}
 	</style>
 </head>
 <body>
-	<div class="container">
+	<div class="container main-page">
 		<div class="row">
 			<div class="col-sm-12">
 				<h1>Feedback for a cause</h1>
 
+				<h2 class="header-message text-muted"></h2>
+
 				<div class="message"></div>
 
-				<form method="POST" action="http://localhost:8080/donation" class="form-horizontal">
+				<form method="POST" action="http://localhost:8080/donation" class="form-horizontal main">
+					<input type="hidden" value="{{ cause.id }}" name="cause_id">
+
 					<div class="form-group">
 						<div class="col-sm-10 col-sm-offset-2 resp-type">
 							<div class="radio anon-input">
@@ -39,93 +49,136 @@
 								</label>
 							</div>
 
-							<div class="radio">
+							<!--<div class="radio">
 								<label>
 									<input type="radio" name="responseType" value="friend">
 									Challenge a friend
 								</label>
-							</div>
+							</div>-->
 						</div>
 					</div>
 
 					<div style="margin-top: 15px"></div>
 
 					{% for question in cause.questions %}
-					<div class="form-group">
+					<div class="form-group temp-hidden">
 						<p class="col-sm-10 col-sm-offset-2">
 							{{ question.text }}
 						</p>
 
 						<div class="col-sm-10 col-sm-offset-2">
-							<div class="radio">
-								<label>
-									<input type="radio" name="question-{{ question.id }}" value="question1">
-									{{ question.question_1 }}
-								</label>
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="radio">
+										<label>
+											<input type="radio" name="question{{ question.id }}" value="{{ question.question_1|e }}">
+											{{ question.question_1 }}
+										</label>
+									</div>
+								</div>
+
+								<div class="col-sm-6">
+									<div class="radio">
+										<label>
+											<input type="radio" name="question{{ question.id }}" value="{{ question.question_2|e }}">
+											{{ question.question_2 }}
+										</label>
+									</div>
+								</div>
 							</div>
 
-							<div class="radio">
-								<label>
-									<input type="radio" name="question-{{ question.id }}" value="question1">
-									{{ question.question_2 }}
-								</label>
-							</div>
+							<div class="row">
+								{% if question.question_3 is not none and question.question_3 != '' %}
+								<div class="col-sm-6">
+									<div class="radio">
+										<label>
+											<input type="radio" name="question{{ question.id }}" value="{{ question.question_3|e }}">
+											{{ question.question_3 }}
+										</label>
+									</div>
+								</div>
+								{% endif %}
 
-							{% if question.question_3 is not none %}
-							<div class="radio">
-								<label>
-									<input type="radio" name="question-{{ question.id }}" value="question1">
-									{{ question.question_3 }}
-								</label>
+								{% if question.question_4 is not none and question.question_4 != '' %}
+								<div class="col-sm-6">
+									<div class="radio">
+										<label>
+											<input type="radio" name="question{{ question.id }}" value="{{ question.question_4|e }}">
+											{{ question.question_4 }}
+										</label>
+									</div>
+								</div>
+								{% endif %}
 							</div>
-							{% endif %}
-
-							{% if question.question_4 is not none %}
-							<div class="radio">
-								<label>
-									<input type="radio" name="question-{{ question.id }}" value="question1">
-									{{ question.question_4 }}
-								</label>
-							</div>
-							{% endif %}
 						</div>
 					</div>
 					{% endfor %}
 
-					<div class="form-group name">
+					<div class="form-group name temp-hidden">
 						<label class="control-label col-sm-2" for="name">Name</label>
 						<div class="col-sm-10">
 							<input type="text" placeholder="Name" name="name" class="form-control">
 						</div>
 					</div>
 
-					<div class="form-group name">
+					<div class="form-group name temp-hidden">
 						<label class="control-label col-sm-2" for="email">Email</label>
 						<div class="col-sm-10">
 							<input type="email" placeholder="Email address" name="email" class="form-control">
 						</div>
 					</div>
 
-					<div class="form-group friend">
+					<div class="form-group friend temp-hidden">
 						<label class="control-label col-sm-2" for="friend_name">Friend's name</label>
 						<div class="col-sm-10">
 							<input type="text" placeholder="Friend's name" name="friend_name" class="form-control">
 						</div>
 					</div>
 
-					<div class="form-group friend">
+					<div class="form-group friend temp-hidden">
 						<label class="control-label col-sm-2" for="friend_email">Friend's email</label>
 						<div class="col-sm-10">
 							<input type="email" placeholder="Friend's email address" name="friend_email" class="form-control">
 						</div>
 					</div>
 
-					<div class="form-group">
+					<div class="form-group temp-hidden">
 						<div class="col-sm-10 col-sm-offset-2">
 							<button type="submit" class="btn btn-primary">Submit feedback</button>
 						</div>
 					</div>
 				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="container social-page text-center">
+		<div class="row">
+			<div class="col-sm-6 col-sm-offset-3">
+				<h1>Thank you for participating</h1>
+
+				<div class="row anon-email" style="display: none; margin-bottom: 15px;">
+					<div class="col-sm-12">
+						<div class="anon-email-form">
+							<h2>Allow us to thank you</h2>
+
+							<form method="POST" action="/email" class="form-inline anon">
+								<input type="hidden" value="" name="user_id">
+
+								<div class="form-group">
+									<label for="anon_email">Email</label>
+									<input type="email" placeholder="Email address" name="anon_email">
+								</div>
+
+								<button type="submit" class="btn btn-primary">Send</button>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<a target="_blank" class="btn btn-tweet" href="https://twitter.com/intent/tweet?text=I%20just%20helped%20whatever&url=https://www.google.com">Twitter</a>
+				<a target="_blank" class="btn btn-facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ cause.url|urlencode }}">Facebook</a>
+				<a target="_blank" class="btn btn-google" href="https://plus.google.com/share?url={{ cause.url|urlencode }}">Google+</a>
 			</div>
 		</div>
 	</div>
@@ -142,10 +195,10 @@
 			<div class="clearfix"></div>
 		</div>
 		<div class="progress">
-			<div class="progress-bar" style="width: {{ completed }}%">{{ completed }}%</div>
+			<div class="progress-bar" style="width: {{ percent }}%">{{ percent }}%</div>
 		</div>
 
-		<div class="text-center">Just {{ remaining }}, {{ percent }}% to go</div>
+		<div class="text-center">We need {{ remaining }} ({{ percentleft }}%) more feedback responses</div>
 	</script>
 
 	<script id="feedback-single" type="x-tmpl-mustache">
@@ -156,8 +209,10 @@
 	{% endraw %}
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.1.0/mustache.min.js"></script>
+	<script src="https://cdn.rawgit.com/timheap/serialize.js/master/serialize.min.js"></script>
 	<script>
-	var radios = document.querySelectorAll('.resp-type input[type="radio"]');
+	var radios = document.querySelectorAll('.resp-type input[type="radio"]'),
+		hasUnhidden = false;
 
 	for (var i = 0; i < radios.length; i++) {
 		radios[i].addEventListener('click', function (ev) {
@@ -176,17 +231,23 @@
 		document.querySelector('.message').innerHTML = rendered;
 	};
 
+	var currentVisible;
 	var updateVisible = function (type) {
 		for (var key in fields) {
 			for (var i = 0; i < fields[key].length; i++) {
 				fields[key][i].style.display = 'none';
+				fields[key][i].querySelector('input').required = 'false';
 			}
 		}
 
 		for (var i = 0; i < fields[type].length; i++) {
 			fields[type][i].style.display = 'block';
+			fields[type][i].querySelector('input').required = 'required';
 		}
+
+		currentVisible = type;
 	};
+	updateVisible('name');
 
 	var enableAnon = function (on) {
 		if (!on) {
@@ -194,10 +255,59 @@
 		}
 	};
 
+	document.querySelector('form.main').addEventListener('submit', function (e) {
+		e.preventDefault();
+		var postString = FormSerializer.serialize(document.querySelector('form.main'));
+
+		console.log(postString);
+
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', '/donation');
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+		xhr.onload = function () {
+			document.querySelector('.main-page').style.display = 'none';
+			document.querySelector('.social-page').style.display = 'block';
+
+			document.querySelector('.btn-tweet').href = 'https://twitter.com/intent/tweet?url={{ cause.url|urlencode }}&text={{ "I just gave my feedback to help " + cause.goal_donation_charity + "! Give yours at"|urlencode }}';
+
+			if (currentVisible == 'anon') {
+				document.querySelector('.anon-email').style.display = 'block';
+			}
+
+			var userId = xhr.responseText;
+
+			document.querySelector('input[name="user_id"]').value = userId;
+		};
+
+		xhr.send(postString);
+	});
+
+	document.querySelector('form.anon').addEventListener('submit', function (e) {
+		e.preventDefault();
+		var postString = FormSerializer.serialize(document.querySelector('form.anon'));
+
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', '/email');
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+		xhr.onload = function () {
+			document.querySelector('.anon-email-form').innerHTML = '';
+
+			var thank = document.createElement('h2');
+			thank.innerHTML = 'Thank you!';
+
+			document.querySelector('.anon-email-form').appendChild(thank);
+		};
+
+		xhr.send(postString);
+	});
+
 	var goalType = '{{ cause.feedback_goal_type }}';
 
-	updateVisible('name');
 	enableAnon(!{{ cause.email_required|tojson }});
+
+	document.querySelector('.header-message').innerHTML = {{ cause.header_message|tojson }};
 	</script>
 
 	{% if cause.feedback_goal_type == 'goal' %}
@@ -208,15 +318,16 @@
 		money: {{ cause.goal_donation_amount }},
 		charity: {{ cause.goal_donation_charity|tojson }},
 		remaining: {{ cause.goal_feedback_required }} - {{ count }},
-		percent: Math.abs({{ count }} / {{ cause.goal_feedback_required }} - 100).toFixed(2)
+		percent: ({{ count }} / {{ cause.goal_feedback_required }}).toFixed(2),
+		percentleft: Math.abs({{ count }} / {{ cause.goal_feedback_required }} - 100).toFixed(2)
 	});
 	</script>
 	{% elif cause.feedback_goal_type == 'single' %}
 	<script>
 	renderTemplate('single', {
-		amount: '',
-		charity: '',
-		total: ''
+		amount: {{ cause.single_donation_amount|tojson }},
+		charity: {{ cause.goal_donation_charity|tojson }},
+		total: {{ cause.single_donation_amount * count }}
 	});
 	</script>
 	{% endif %}
